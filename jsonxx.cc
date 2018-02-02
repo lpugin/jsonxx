@@ -329,7 +329,7 @@ bool Object::parse(std::istream& input, Object& object) {
     return true;
 }
 
-Value::Value() : type_(INVALID_) {}
+Value::Value() : type_(INVALID_) { precision_ = -1; }
 
 void Value::reset() {
     if (type_ == STRING_) {
@@ -344,6 +344,7 @@ void Value::reset() {
         delete array_value_;
         array_value_ = 0;
     }
+    precision_ = -1;
 }
 
 bool Value::parse(std::istream& input, Value& value) {
@@ -609,8 +610,13 @@ namespace json {
                 return remove_last_comma( ss.str() ) + tab + "}" ",\n";
 
             case jsonxx::Value::NUMBER_:
-                // max precision
-                ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+                // controlled (lpugin) precision
+                if (t.precision_ != -1) {
+                    ss << std::setprecision(t.precision_) << std::fixed;
+                }
+                else {
+                    ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+                }
                 ss << t.number_value_;
                 return ss.str() + ",\n";
         }
@@ -797,8 +803,13 @@ std::string tag( unsigned format, unsigned depth, const std::string &name, const
                  + tab + close_tag( format, 'o', name ) + '\n';
 
         case jsonxx::Value::NUMBER_:
-            // max precision
-            ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+            // controlled precision (lpugin)
+            if (t.precision_ != -1) {
+                ss << std::setprecision(t.precision_) << std::fixed;
+            }
+            else {
+                ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+            }
             ss << t.number_value_;
             return tab + open_tag( format, 'n', name, std::string(), format == jsonxx::JXMLex ? ss.str() : std::string() )
                        + ss.str()

@@ -5,6 +5,9 @@
 //   Sean Middleditch <sean@middleditch.us>
 //   rlyeh <https://github.com/r-lyeh>
 
+// Modification: Laurent Pugin <https://github.com/lpugin>
+//    adding precision_ member to Value for ostream precision control
+
 #pragma once
 
 #include <cstddef>
@@ -282,6 +285,7 @@ class Value {
         break;
       case NUMBER_:
         import( other.number_value_ );
+        precision_ = other.precision_;
         break;
       case STRING_:
         import( *other.string_value_ );
@@ -345,6 +349,7 @@ class Value {
     Array* array_value_;
     Object* object_value_;
   };
+  int precision_;
 
 protected:
   static bool parse(std::istream& input, Value& value);
